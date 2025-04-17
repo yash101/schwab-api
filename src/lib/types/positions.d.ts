@@ -1,4 +1,4 @@
-import { AssetType } from "./asset";
+import { AccountsInstrument } from "./accounts"; // Added import
 
 export interface Position {
   shortQuantity: number;
@@ -9,7 +9,7 @@ export interface Position {
   settledLongQuantity: number;
   settledShortQuantity: number;
   agedQuantity: number;
-  instrument: AccountsInstrument;
+  instrument: AccountsInstrument; // Changed from local definition
   marketValue: number;
   maintenanceRequirement: number;
   averageLongPrice: number;
@@ -21,13 +21,4 @@ export interface Position {
   previousSessionLongQuantity: number;
   previousSessionShortQuantity: number;
   currentDayCost: number;
-}
-
-export interface AccountsInstrument {
-  assetType: AssetType;
-  cusip: string;
-  symbol: string;
-  description: string;
-  instrumentId: number;
-  netChange: number;
 }

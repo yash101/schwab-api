@@ -1,6 +1,6 @@
-import { ErrorMessageAndErrors } from "../shared/shared";
-import { AssetType } from "./asset";
-import { CashInitialBalance, MarginBalance, MarginInitialBalance } from "./balances";
+import { ErrorMessageAndErrors } from "./api";
+import { AssetType, PutCallEnum } from "./asset";
+import { CashInitialBalance, MarginBalance, MarginInitialBalance, CashBalance } from "./balances"; // Added CashBalance import
 import { Position } from "./positions";
 
 ////// RPCs
@@ -34,12 +34,12 @@ export enum AccountType {
 
 export interface SecuritiesAccountBase {
   type: AccountType;
-  accountNumber: AccountNumberString;
+  accountNumber: AccountNumberString; // Ensure consistency
   roundTrips: number;
   isDayTrader: boolean;
   isClosingOnlyRestricted: boolean;
   pfcbFlag: boolean;
-  positions: Position[];
+  positions: Position[]; // Uses Position from positions.d.ts
 }
 
 export interface AccountNumberHash {
@@ -54,21 +54,11 @@ export interface MarginAccount extends SecuritiesAccountBase {
   projectedBalances: MarginBalance;
 }
 
-export interface CashBalance {
-  cashAvailableForTrading: number;
-  cashAvailableForWithdrawal: number;
-  cashCall: number;
-  longNonMarginableMarketValue: number;
-  totalCash: number;
-  cashDebitCallValue: number;
-  unsettledCash: number;
-}
-
 export interface CashAccount extends SecuritiesAccountBase {
   type: AccountType.CASH;
-  initialBalances: CashInitialBalance;
-  currentBalances: CashBalance;
-  projectedBalances: CashBalance;
+  initialBalances: CashInitialBalance; // From balances.d.ts
+  currentBalances: CashBalance; // From balances.d.ts
+  projectedBalances: CashBalance; // From balances.d.ts
 }
 
 export type SecuritiesAccount = MarginAccount | CashAccount;
@@ -86,8 +76,30 @@ export interface AccountsBaseInstrument {
   netChange: number;
 }
 
+export enum AccountCashEquivalentTypeEnum {
+  SWEEP_VEHICLE = "SWEEP_VEHICLE",
+  SAVINGS = "SAVINGS",
+  MONEY_MARKET_FUND = "MONEY_MARKET_FUND",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum AccountOptionTypeEnum {
+  VANILLA = "VANILLA",
+  BINARY = "BINARY",
+  BARRIER = "BARRIER",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum UserDetailsTypeEnum {
+  ADVISOR_USER = "ADVISOR_USER",
+  BROKER_USER = "BROKER_USER",
+  CLIENT_USER = "CLIENT_USER",
+  SYSTEM_USER = "SYSTEM_USER",
+  UNKNOWN = "UNKNOWN",
+}
+
 export interface AccountCashEquivalent extends AccountsBaseInstrument {
-  type: "SWEEP_VEHICLE" | "SAVINGS" | "MONEY_MARKET_FUND" | "UNKNOWN";
+  type: AccountCashEquivalentTypeEnum; // Changed from string enum comment
 }
 
 export interface AccountEquity extends AccountsBaseInstrument {
@@ -113,9 +125,9 @@ export interface AccountAPIOptionDeliverable {
 
 export interface AccountOption extends AccountsBaseInstrument {
   optionDeliverables: AccountAPIOptionDeliverable[];
-  putCall: "PUT" | "CALL" | "UNKNOWN";
+  putCall: PutCallEnum; // Changed from string enum comment
   optionMultiplier: number;
-  type: "VANILLA" | "BINARY" | "BARRIER" | "UNKNOWN";
+  type: AccountOptionTypeEnum; // Changed from string enum comment
   underlyingSymbol: string;
 }
 
@@ -125,3 +137,14 @@ export type AccountsInstrument =
   | AccountFixedIncome
   | AccountMutualFund
   | AccountOption;
+
+export interface UserDetails {
+  cdDomainId: string;
+  login: string;
+  type: UserDetailsTypeEnum; // Changed from string enum comment
+  userId: number; // int64
+  systemUserName: string;
+  firstName: string;
+  lastName: string;
+  brokerRepCode: string;
+}

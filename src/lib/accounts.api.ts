@@ -1,15 +1,20 @@
 import assert from "assert";
-import { AuthTokens } from "../auth/tokens";
-import { APIOptions } from "../shared/apioptions";
-import { ErrorMessageAndErrors } from "../shared/shared";
-import { GetAccountNumbersResponse, GetAccountsRequest, GetAccountsResponse, GetSingleAccountRequest, GetSingleAccountResponse } from "../types/accounts";
-import { NoParametersRequest } from "../types/api";
+import { AuthTokens } from "./auth/tokens";
+import { ErrorMessageAndErrors, NoParametersRequest } from "./types/api";
+import { APIOptions } from "./apioptions";
+import {
+  GetAccountNumbersResponse, 
+  GetAccountsRequest,
+  GetAccountsResponse,
+  GetSingleAccountRequest,
+  GetSingleAccountResponse
+} from "./types/accounts";
 
-export async function getAccountNumbers(request?: NoParametersRequest,
+export async function getAccountNumbers(request: NoParametersRequest | null,
   token: AuthTokens, apiOptions?: APIOptions
-): Promise<GetAccountNumbersResponse | ErrorMessageAndErrors> {
-  const uri = new URL('/accounts/numbers',
-    apiOptions?.getBaseUri() || 'https://api.schwabapi.com/v1');
+): Promise<GetAccountNumbersResponse> {
+  const uri = new URL('/trader/v1/accountNumbers',
+    apiOptions?.getBaseUri() || 'https://api.schwabapi.com');
 
   try {
     const response = await fetch(uri, {
@@ -38,11 +43,11 @@ export async function getAccountNumbers(request?: NoParametersRequest,
  * @param apiOptions 
  * @returns 
  */
-export async function getAccounts(request?: GetAccountsRequest,
+export async function getAccounts(request: GetAccountsRequest | null,
   token: AuthTokens, apiOptions?: APIOptions
-): Promise<GetAccountsResponse | ErrorMessageAndErrors> {
-  const uri = new URL('/accounts/numbers',
-    apiOptions?.getBaseUri() || 'https://api.schwabapi.com/v1');
+): Promise<GetAccountsResponse> {
+  const uri = new URL('/trader/v1/accounts',
+    apiOptions?.getBaseUri() || 'https://api.schwabapi.com');
 
   if (request?.fields) {
     // this might not be correct
@@ -54,6 +59,7 @@ export async function getAccounts(request?: GetAccountsRequest,
       headers: {
         Authorization: token.getAuthHeader(),
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       }
     });
 
@@ -82,11 +88,11 @@ export async function getAccounts(request?: GetAccountsRequest,
  */
 export async function getAccount(request: GetSingleAccountRequest,
   token: AuthTokens, apiOptions?: APIOptions
-): Promise<GetSingleAccountResponse | ErrorMessageAndErrors> {
+): Promise<GetSingleAccountResponse> {
   assert(request.accountNumber, 'accountNumber is required');
 
-  const uri = new URL(`/accounts/${request.accountNumber}`,
-    apiOptions?.getBaseUri() || 'https://api.schwabapi.com/v1');
+  const uri = new URL(`/trader/v1/accounts/${request.accountNumber}`,
+    apiOptions?.getBaseUri() || 'https://api.schwabapi.com');
 
   if (request.fields) {
     // this might not be correct
@@ -98,6 +104,7 @@ export async function getAccount(request: GetSingleAccountRequest,
       headers: {
         Authorization: token.getAuthHeader(),
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       }
     });
 
@@ -111,5 +118,3 @@ export async function getAccount(request: GetSingleAccountRequest,
     throw new Error(`Failed to get account: ${e.message}`);
   }
 }
-
-

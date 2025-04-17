@@ -1,7 +1,8 @@
-import { ErrorMessageAndErrors } from "../shared/shared";
-import { AccountsInstrument, EncryptedAccountNumber } from "./accounts";
-import { NoParametersResponse } from "./api";
+import { AccountsInstrument, EncryptedAccountNumber, AccountNumberString } from "./accounts"; // Added AccountNumberString
+import { APIRuleAction, ErrorMessageAndErrors, NoParametersResponse } from "./api";
 import { AssetType } from "./asset";
+import { CommissionAndFee } from "./fee";
+import { DestinationEnum, DurationEnum, SessionEnum } from "./market";
 
 //////// RPCs
 
@@ -14,7 +15,7 @@ export type GetOrdersForAccountResponse = Order[];
 // Place order for an account
 export interface PostOrderForAccountRequest {
   accountNumber: EncryptedAccountNumber;
-  order: Order;
+  order: OrderRequest; // Changed from Order
 }
 export type PostOrderForAccountResponse = Order;
 
@@ -37,7 +38,7 @@ export type DeleteOrderForAccountByOrderIdResponse =
 export interface ReplaceOrderForAccountByOrderIdRequest {
   accountNumber: EncryptedAccountNumber;
   orderId: number; // int64
-  order: Order;
+  order: OrderRequest; // Changed from Order
 }
 export type ReplaceOrderForAccountByOrderIdResponse =
   NoParametersResponse | ErrorMessageAndErrors;
@@ -48,14 +49,14 @@ export type GetOrdersForAllAccountsResponse = Order[];
 
 // Preview order for an account
 export type PreviewOrderForAccountRequest = PostOrderForAccountRequest;
-export type PreviewOrderForAccountResponse = Order;
+export type PreviewOrderForAccountResponse = PreviewOrder;
 
 //////// Types & Interfaces
 
 export interface BaseGetOrdersRequest {
   maxResults?: number; // i64
-  fromEnteredTime: Date;
-  toEnteredTime: Date;
+  fromEnteredTime: Date; // Changed from Date
+  toEnteredTime: Date; // Changed from Date
   status?: OrderStatusEnum; // or somtthing
 }
 
@@ -84,46 +85,8 @@ export enum OrderStatusEnum {
 }
 
 /**
- * Represents an order in the trading system, including its details, status, and associated activities.
- *
- * @interface Order
- *
- * @property {SessionEnum} session - The trading session during which the order is active.
- * @property {DurationEnum} duration - The duration for which the order remains valid.
- * @property {OrderTypeEnum} orderType - The type of the order (e.g., MARKET, LIMIT).
- * @property {string} [cancelTime] - The time at which the order will be canceled, if applicable (ISO 8601 format).
- * @property {ComplexOrderStrategyTypeEnum} complexOrderStrategyType - The strategy type for complex orders.
- * @property {number} quantity - The total quantity of the order.
- * @property {number} filledQuantity - The quantity of the order that has been filled.
- * @property {number} remainingQuantity - The quantity of the order that remains unfilled.
- * @property {RequestedDestinationEnum} requestedDestination - The requested destination for the order execution.
- * @property {string} destinationLinkName - The specific venue name if AUTO is not used.
- * @property {string} [releaseTime] - The release time for conditional orders (ISO 8601 format).
- * @property {number} [stopPrice] - The stop price for the order, if applicable.
- * @property {StopPriceLinkBasisEnum} stopPriceLinkBasis - The basis for linking the stop price.
- * @property {StopPriceLinkTypeEnum} stopPriceLinkType - The type of link for the stop price.
- * @property {number} [stopPriceOffset] - The offset for the stop price, if applicable.
- * @property {StopTypeEnum} stopType - The type of stop order.
- * @property {PriceLinkBasisEnum} priceLinkBasis - The basis for linking the price.
- * @property {PriceLinkTypeEnum} priceLinkType - The type of link for the price.
- * @property {number} [price] - The price for the order (e.g., limit price).
- * @property {TaxLotMethodEnum} taxLotMethod - The tax lot method used for the order.
- * @property {OrderLegCollection[]} orderLegCollection - The collection of order legs associated with the order.
- * @property {number} [activationPrice] - The activation price for conditional orders, if applicable.
- * @property {SpecialInstructionEnum} specialInstruction - Any special instructions for the order.
- * @property {OrderStrategyTypeEnum} orderStrategyType - The strategy type for the order.
- * @property {number} orderId - The unique identifier for the order (int64).
- * @property {boolean} cancelable - Indicates whether the order can be canceled.
- * @property {boolean} editable - Indicates whether the order can be edited.
- * @property {OrderStatusEnum} status - The current status of the order.
- * @property {string} enteredTime - The time the order was entered (ISO 8601 format).
- * @property {string} [closeTime] - The time the order was closed (e.g., filled or expired) (ISO 8601 format).
- * @property {string} [tag] - A user-defined tag for the order.
- * @property {number} accountNumber - The account number associated with the order (int64).
- * @property {OrderActivity[]} orderActivityCollection - The collection of activities associated with the order.
- * @property {Order[]} replacingOrderCollection - The collection of orders that replaced this order, if any.
- * @property {OrderStrategy[]} childOrderStrategies - The child order strategies for complex orders.
- * @property {string} statusDescription - A more descriptive text for the order's status.
+ * Represents an order response from the API.
+ * Use OrderRequest for placing/replacing orders.
  */
 export interface Order {
   session: SessionEnum;
@@ -132,9 +95,9 @@ export interface Order {
   cancelTime?: string; // ISO 8601 date-time string
   complexOrderStrategyType: ComplexOrderStrategyTypeEnum;
   quantity: number; // Total order quantity
-  filledQuantity: number;
-  remainingQuantity: number;
-  requestedDestination: RequestedDestinationEnum;
+  filledQuantity: number; // Response only
+  remainingQuantity: number; // Response only
+  requestedDestination: DestinationEnum;
   destinationLinkName: string; // Specific venue name if AUTO not used
   releaseTime?: string; // ISO 8601 date-time string for conditional orders
   stopPrice?: number;
@@ -150,69 +113,162 @@ export interface Order {
   activationPrice?: number; // For conditional orders
   specialInstruction: SpecialInstructionEnum;
   orderStrategyType: OrderStrategyTypeEnum;
-  orderId: number; // int64
-  cancelable: boolean;
-  editable: boolean;
-  status: OrderStatusEnum;
-  enteredTime: string; // ISO 8601 date-time string
-  closeTime?: string; // ISO 8601 date-time string for fill or expiry time
+  orderId: number; // int64 - Response only
+  cancelable: boolean; // Response only
+  editable: boolean; // Response only
+  status: OrderStatusEnum; // Response only
+  enteredTime: string; // ISO 8601 date-time string - Response only
+  closeTime?: string; // ISO 8601 date-time string for fill or expiry time - Response only
   tag?: string; // User-defined tag
-  accountNumber: number; // int64
-  orderActivityCollection: OrderActivity[];
-  replacingOrderCollection: Order[]; // Array of the replacing orders
-  childOrderStrategies: ChildOrderStrategy[];
-  statusDescription: string; // More descriptive status text
+  accountNumber: AccountNumberString; // Changed from number - Response only
+  orderActivityCollection: OrderActivity[]; // Response only
+  replacingOrderCollection: Order[]; // Array of the replacing orders - Response only
+  childOrderStrategies: ChildOrderStrategy[]; // Response only
+  statusDescription: string; // More descriptive status text - Response only
+}
+
+/**
+ * Represents the structure for placing or replacing an order.
+ */
+export interface OrderRequest {
+  session: SessionEnum;
+  duration: DurationEnum;
+  orderType: OrderTypeEnum; // Consider using a stricter enum without UNKNOWN if API requires it for requests
+  cancelTime?: string; // ISO 8601 date-time string
+  complexOrderStrategyType: ComplexOrderStrategyTypeEnum;
+  quantity: number;
+  requestedDestination: DestinationEnum;
+  destinationLinkName: string;
+  releaseTime?: string; // ISO 8601 date-time string for conditional orders
+  stopPrice?: number;
+  stopPriceLinkBasis: StopPriceLinkBasisEnum;
+  stopPriceLinkType: StopPriceLinkTypeEnum;
+  stopPriceOffset?: number;
+  stopType: StopTypeEnum;
+  priceLinkBasis: PriceLinkBasisEnum;
+  priceLinkType: PriceLinkTypeEnum;
+  price?: number;
+  taxLotMethod: TaxLotMethodEnum;
+  orderLegCollection: OrderLegCollection[]; // Ensure OrderLegCollection is suitable for requests
+  activationPrice?: number;
+  specialInstruction: SpecialInstructionEnum;
+  orderStrategyType: OrderStrategyTypeEnum;
+  tag?: string; // User-defined tag
+  // Note: accountNumber is part of the request body, not this object
 }
 
 export interface ChildOrderStrategy {
   orderStrategyType: OrderStrategyTypeEnum;
-  orders: Order[]; // Nested orders within the child strategy
+  orders: Order[]; // Nested orders within the child strategy - Response only? Review if needed for requests.
 }
 
 export interface OrderLegCollection {
   orderLegType: AssetType;
-  legId: number; // int64
-  instrument: AccountsInstrument;
+  legId: number; // int64 - May not be needed for request? Review API spec.
+  instrument: AccountsInstrument; // Ensure AccountsInstrument is suitable for requests
   instruction: InstructionEnum;
-  positionEffect: PositionEffectEnum;
+  positionEffect: PositionEffectEnum; // Changed from string enum comment
   quantity: number;
-  quantityType: QuantityTypeEnum;
-  divCapGains?: DivCapGainsEnum;
+  quantityType: QuantityTypeEnum; // Changed from string enum comment
+  divCapGains?: DivCapGainsEnum; // Changed from string enum comment
   toSymbol?: string; // Used for specific instructions like Exchange
 }
 
 export interface OrderActivity {
-  activityType: ActivityTypeEnum;
-  executionType: ExecutionTypeEnum;
+  activityType: OrderActivityTypeEnum; // Changed from string enum comment
+  executionType: 'FILL'; // Changed from string enum comment
   quantity: number; // Quantity in this activity
   orderRemainingQuantity: number; // Remaining after this activity
   executionLegs: ExecutionLeg[];
 }
 
+export interface PreviewOrder {
+  orderId: number; // int64 - ID assigned during preview
+  orderStrategy: OrderStrategy; // The details of the order being previewed
+  orderValidationResult: OrderValidationResult; // Warnings, errors, etc.
+  commissionAndFee: CommissionAndFee; // Estimated costs
+}
+
+export interface OrderValidationResult {
+  alerts: OrderValidationDetail[];
+  accepts: OrderValidationDetail[];
+  rejects: OrderValidationDetail[];
+  reviews: OrderValidationDetail[];
+  warns: OrderValidationDetail[];
+}
+
+export interface OrderValidationDetail {
+  validationRuleName: string;
+  message: string;
+  activityMessage: string;
+  originalSeverity: APIRuleAction;
+  overrideName: string;
+  overrideSeverity: APIRuleAction;
+}
+
+export interface OrderStrategy {
+  accountNumber: AccountNumberString; // Changed from number
+  advancedOrderType: AdvancedOrderTypeEnum; // Enum for advanced order types
+  closeTime?: string; // ISO 8601 date-time string
+  enteredTime: string; // ISO 8601 date-time string
+  orderBalance: OrderBalance; // Balance details for the order
+  orderStrategyType: OrderStrategyTypeEnum; // Strategy type for the order
+  orderVersion: number;
+  session: SessionEnum; // Trading session
+  status: OrderStatusEnum; // Current status of the order
+  allOrNone: boolean;
+  discretionary: boolean;
+  duration: DurationEnum; // Duration of the order
+  filledQuantity: number; // Quantity filled
+  orderType: OrderTypeEnum; // Type of the order
+  orderValue: number; // Total value of the order
+  price?: number; // Price for the order
+  quantity: number; // Total quantity of the order
+  remainingQuantity: number; // Remaining quantity
+  sellNonMarginableFirst: boolean;
+  settlementInstruction: SettlementInstructionEnum; // Settlement instructions
+  strategy: ComplexOrderStrategyTypeEnum; // Complex order strategy
+  amountIndicator: AmountIndicatorEnum; // Indicator for amount type
+  orderLegs: OrderLegCollection[]; // Collection of order legs
+}
+
+export interface OrderBalance {
+  orderValue: number; // Total value of the order
+  projectedAvailableFund: number; // Projected available funds after the order
+  projectedBuyingPower: number; // Projected buying power after the order
+  projectedCommission: number; // Projected commission for the order
+}
+
+
 export interface ExecutionLeg {
   legId: number; // int64
-  price: number;
-  quantity: number;
-  mismarkedQuantity?: number;
-  instrumentId: number; // int64
+  price: number; // double
+  quantity: number; // double
+  mismarkedQuantity: number; // double
+  instrumentId: number; // int64 - Matches instrument in OrderLegCollection?
   time: string; // ISO 8601 date-time string
 }
 
-export enum SessionEnum {
-  NORMAL = "NORMAL",
-  AM = "AM",
-  PM = "PM",
-  SEAMLESS = "SEAMLESS",
+export enum SettlementInstructionEnum {
+  REGULAR = "REGULAR",
+  CASH = "CASH",
+  NEXT_DAY = "NEXT_DAY",
+  UNKNOWN = "UNKNOWN",
 }
 
-export enum DurationEnum {
-  DAY = "DAY",
-  GOOD_TILL_CANCEL = "GOOD_TILL_CANCEL",
-  FILL_OR_KILL = "FILL_OR_KILL",
-  IMMEDIATE_OR_CANCEL = "IMMEDIATE_OR_CANCEL",
-  END_OF_WEEK = "END_OF_WEEK",
-  END_OF_MONTH = "END_OF_MONTH",
-  NEXT_END_OF_MONTH = "NEXT_END_OF_MONTH",
+export enum AmountIndicatorEnum {
+  DOLLARS = "DOLLARS",
+  SHARES = "SHARES",
+  ALL_SHARES = "ALL_SHARES",
+  PERCENTAGE = "PERCENTAGE",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum PositionEffectEnum {
+  OPEN = "OPEN",
+  CLOSE = "CLOSE",
+  ROLL = "ROLL",
+  OFFSET = "OFFSET",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -231,7 +287,7 @@ export enum OrderTypeEnum {
   NET_CREDIT = "NET_CREDIT",
   NET_ZERO = "NET_ZERO",
   LIMIT_ON_CLOSE = "LIMIT_ON_CLOSE",
-  UNKNOWN = "UNKNOWN",
+  UNKNOWN = "UNKNOWN"
 }
 
 export enum ComplexOrderStrategyTypeEnum {
@@ -255,22 +311,19 @@ export enum ComplexOrderStrategyTypeEnum {
   UNBALANCED_IRON_CONDOR = "UNBALANCED_IRON_CONDOR",
   UNBALANCED_VERTICAL_ROLL = "UNBALANCED_VERTICAL_ROLL",
   MUTUAL_FUND_SWAP = "MUTUAL_FUND_SWAP",
-  CUSTOM = "CUSTOM",
+  CUSTOM = "CUSTOM"
 }
 
-export enum RequestedDestinationEnum {
-  INET = "INET",
-  ECN_ARCA = "ECN_ARCA",
-  CBOE = "CBOE",
-  AMEX = "AMEX",
-  PHLX = "PHLX",
-  ISE = "ISE",
-  BOX = "BOX",
-  NYSE = "NYSE",
-  NASDAQ = "NASDAQ",
-  BATS = "BATS",
-  C2 = "C2",
-  AUTO = "AUTO",
+export enum AdvancedOrderTypeEnum {
+  NONE = "NONE",
+  OTO = "OTO", // One Triggers Other
+  OCO = "OCO", // One Cancels Other
+  OTOCO = "OTOCO", // One Triggers OCO
+  OT2OCO = "OT2OCO", // One Triggers Two OCO
+  OT3OCO = "OT3OCO", // One Triggers Three OCO
+  BLAST_ALL = "BLAST_ALL",
+  OTA = "OTA", // One Triggers All
+  PAIR = "PAIR",
 }
 
 export enum StopPriceLinkBasisEnum {
@@ -282,13 +335,13 @@ export enum StopPriceLinkBasisEnum {
   ASK = "ASK",
   ASK_BID = "ASK_BID",
   MARK = "MARK",
-  AVERAGE = "AVERAGE",
+  AVERAGE = "AVERAGE"
 }
 
 export enum StopPriceLinkTypeEnum {
   VALUE = "VALUE",
   PERCENT = "PERCENT",
-  TICK = "TICK",
+  TICK = "TICK"
 }
 
 export enum StopTypeEnum {
@@ -296,7 +349,7 @@ export enum StopTypeEnum {
   BID = "BID",
   ASK = "ASK",
   LAST = "LAST",
-  MARK = "MARK",
+  MARK = "MARK"
 }
 
 export enum PriceLinkBasisEnum {
@@ -308,13 +361,13 @@ export enum PriceLinkBasisEnum {
   ASK = "ASK",
   ASK_BID = "ASK_BID",
   MARK = "MARK",
-  AVERAGE = "AVERAGE",
+  AVERAGE = "AVERAGE"
 }
 
 export enum PriceLinkTypeEnum {
   VALUE = "VALUE",
   PERCENT = "PERCENT",
-  TICK = "TICK",
+  TICK = "TICK"
 }
 
 export enum TaxLotMethodEnum {
@@ -324,13 +377,13 @@ export enum TaxLotMethodEnum {
   LOW_COST = "LOW_COST",
   AVERAGE_COST = "AVERAGE_COST",
   SPECIFIC_LOT = "SPECIFIC_LOT",
-  LOSS_HARVESTER = "LOSS_HARVESTER",
+  LOSS_HARVESTER = "LOSS_HARVESTER"
 }
 
 export enum SpecialInstructionEnum {
   ALL_OR_NONE = "ALL_OR_NONE",
   DO_NOT_REDUCE = "DO_NOT_REDUCE",
-  ALL_OR_NONE_DO_NOT_REDUCE = "ALL_OR_NONE_DO_NOT_REDUCE",
+  ALL_OR_NONE_DO_NOT_REDUCE = "ALL_OR_NONE_DO_NOT_REDUCE"
 }
 
 export enum OrderStrategyTypeEnum {
@@ -342,33 +395,7 @@ export enum OrderStrategyTypeEnum {
   TWO_DAY_SWAP = "TWO_DAY_SWAP",
   BLAST_ALL = "BLAST_ALL",
   OCO = "OCO",
-  TRIGGER = "TRIGGER",
-}
-
-export enum PositionEffectEnum {
-  OPENING = "OPENING",
-  CLOSING = "CLOSING",
-  AUTOMATIC = "AUTOMATIC",
-}
-
-export enum QuantityTypeEnum {
-  ALL_SHARES = "ALL_SHARES",
-  DOLLARS = "DOLLARS",
-  SHARES = "SHARES",
-}
-
-export enum DivCapGainsEnum {
-  REINVEST = "REINVEST",
-  PAYOUT = "PAYOUT",
-}
-
-export enum ActivityTypeEnum {
-  EXECUTION = "EXECUTION",
-  ORDER_ACTION = "ORDER_ACTION",
-}
-
-export enum ExecutionTypeEnum {
-  FILL = "FILL",
+  TRIGGER = "TRIGGER"
 }
 
 export enum InstructionEnum {
@@ -381,5 +408,21 @@ export enum InstructionEnum {
   SELL_TO_OPEN = "SELL_TO_OPEN",
   SELL_TO_CLOSE = "SELL_TO_CLOSE",
   EXCHANGE = "EXCHANGE",
-  SELL_SHORT_EXEMPT = "SELL_SHORT_EXEMPT",
+  SELL_SHORT_EXEMPT = "SELL_SHORT_EXEMPT"
+}
+
+export enum QuantityTypeEnum {
+  ALL_SHARES = "ALL_SHARES",
+  DOLLARS = "DOLLARS",
+  SHARES = "SHARES"
+}
+
+export enum DivCapGainsEnum {
+  REINVEST = "REINVEST",
+  PAYOUT = "PAYOUT"
+}
+
+export enum OrderActivityTypeEnum {
+  EXECUTION = "EXECUTION",
+  ORDER_ACTION = "ORDER_ACTION",
 }

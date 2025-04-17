@@ -12,3 +12,8 @@ export enum APIRuleAction {
 
 // ISO-8601 date-time format
 export type DateAndTime = string;
+
+export interface ErrorMessageAndErrors {
+  errorMessage: string;
+  errors: string[];
+}
