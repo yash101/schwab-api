@@ -136,3 +136,4 @@ dist
 .pnp.*
 docs/
 .DS_Store
+test-do-not-commit.sh

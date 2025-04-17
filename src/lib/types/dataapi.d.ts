@@ -1,5 +1,446 @@
+/**
+ * Represents a comprehensive set of TypeScript interfaces, types, and enums for interacting with a market data API.
+ * These definitions are designed to facilitate the retrieval and manipulation of financial market data, including quotes,
+ * option chains, fundamental data, and reference information for various asset types.
+ *
+ * ### Key Features:
+ * - **Quote Retrieval**: Interfaces for requesting and receiving quotes for multiple symbols or a single symbol.
+ * - **Option Chains**: Support for retrieving detailed option chain data, including contract types, expiration dates, and theoretical values.
+ * - **Market Hours**: Provides information about market hours, including session intervals and open/close status.
+ * - **Reference Data**: Includes detailed reference information for equities, forex, mutual funds, futures, and options.
+ * - **Error Handling**: Structured error responses with detailed descriptions and sources of errors.
+ * - **Fundamental Data**: Access to fundamental metrics such as dividend yield, P/E ratio, and earnings per share.
+ * - **Enums for Standardization**: Enums for asset types, option strategies, expiration types, and more to ensure consistency.
+ *
+ * ### Interfaces Overview:
+ * - **GetQuotesRequest**: Represents a request to retrieve quotes for a list of symbols, with optional fields and indicative quotes.
+ * - **GetQuotesResponse**: Represents the response for a quotes request, including quote data or error information.
+ * - **GetOptionChainsRequest**: Represents a request to retrieve option chains for a specific symbol, with various optional parameters.
+ * - **OptionChain**: Represents the detailed structure of an option chain, including call and put expiration date maps.
+ * - **MarketHours**: Provides detailed market hours information for a specific date and market type.
+ * - **ErrorResponse**: Represents a structured error response with detailed error information.
+ * - **Fundamental**: Provides fundamental metrics for a financial instrument, such as dividend yield and P/E ratio.
+ * - **InstrumentResponse**: Represents detailed information about a financial instrument, including bonds and fundamental data.
+ *
+ * ### Enums Overview:
+ * - **AssetMainTypeEnum**: Enum for main asset types such as equity, bond, ETF, and option.
+ * - **OptionStrategyEnum**: Enum for various option strategies, including single, vertical, and straddle.
+ * - **OptionExpirationType**: Enum for expiration types such as monthly, quarterly, and weekly.
+ * - **DividendFrequency**: Enum for dividend payment frequencies, such as annual, quarterly, and monthly.
+ * - **HttpStatusCode**: Enum for HTTP status codes, including 400 (Bad Request) and 500 (Internal Server Error).
+ *
+ * ### Usage:
+ * These TypeScript definitions are intended to be used in applications that interact with a financial market data API.
+ * They provide a strongly-typed structure for making API requests and handling responses, ensuring type safety and clarity.
+ *
+ * ### Example:
+ * ```typescript
+ * const request: GetQuotesRequest = {
+ *   symbols: ['AAPL', 'MSFT'],
+ *   fields: [GetQuotesAcceptableFieldsEnum.QUOTE, GetQuotesAcceptableFieldsEnum.FUNDAMENTAL],
+ *   indicative: true,
+ * };
+ *
+ * const response: GetQuotesResponse = await fetchQuotes(request);
+ * if ('errors' in response) {
+ *   console.error('Error fetching quotes:', response.errors);
+ * } else {
+ *   console.log('Quotes:', response);
+ * }
+ * ```
+ */
+
+
 import { PutCallEnum } from './asset';
 import { ExchangeName } from './market';
+
+/////// RPCs
+
+/**
+ * GET /v1/marketdata/quotes
+ * Represents a request to retrieve quotes for a list of symbols.
+ *
+ * @property symbols - An array of symbols for which quotes are requested.
+ *
+ * @property fields - An optional array of acceptable field enums to specify a subset of data to return.
+ * Possible root nodes include:
+ * - `quote`
+ * - `fundamental`
+ * - `extended`
+ * - `reference`
+ * - `regular`
+ * 
+ * If not provided, the default fields `[quote, fundamental]` will be used.
+ * To retrieve the full response, omit this attribute.
+ *
+ * @property indicative - An optional boolean to include indicative symbol quotes for all ETF symbols in the request.
+ * If set to `true`, the API will return quotes for the requested ETF symbols and their corresponding indicative quotes
+ * (e.g., `$ABC.IV` for the ETF symbol `ABC`).
+ */
+export interface GetQuotesRequest {
+  symbols: string[]; // List of symbols
+  fields?: GetQuotesAcceptableFieldsEnum[];
+  indicative?: boolean;
+}
+
+/**
+ * GET /v1/marketdata/quotes
+ * Represents a map of symbols to their corresponding quote responses.
+ */
+export type GetQuotesResponse = QuoteResponse | ErrorResponse;
+
+/**
+ * GET /v1/marketdata/{symbol_id}/quotes
+ * Represents a request to retrieve quotes for a specific symbol.
+ *
+ * @property symbol - The symbol for which the quote is requested.
+ *
+ * @property fields - An optional array of acceptable field enums to specify a subset of data to return.
+ * Possible root nodes include:
+ * - `quote`
+ * - `fundamental`
+ * - `extended`
+ * - `reference`
+ * - `regular`
+ *
+ * If not provided, the default fields `[quote, fundamental]` will be used.
+ * To retrieve the full response, omit this attribute.
+ */
+export interface GetSingleQuoteRequest {
+  symbol: string; // Symbol for which the quote is requested
+  fields?: GetQuotesAcceptableFieldsEnum[];
+}
+
+/**
+ * GET /v1/marketdata/{symbol_id}/quotes
+ * Represents a response containing the quote information for a specific symbol.
+ */
+export type GetSingleQuoteResponse =
+  QuoteResponseObject | ErrorResponse;
+
+/**
+ * GET /v1/marketdata/chains
+ *
+ * Represents a request to retrieve option chains for a specific symbol.
+ */
+export interface GetOptionChainsRequest {
+  /**
+   * The ticker symbol for which to fetch option chains (e.g., "AAPL").
+   */
+  symbol: string;
+
+  /**
+   * Filter by contract type: CALL, PUT, or ALL.
+   */
+  contractType?: PutCallAllEnum;
+
+  /**
+   * Number of strikes above and below the at‑the‑money price to return.
+   * @type integer
+   */
+  strikeCount?: number;
+
+  /**
+   * Whether to include the underlying symbol’s quote alongside the options.
+   * @default false
+   */
+  includeUnderlyingQuote?: boolean;
+
+  /**
+   * Strategy for the option chain:
+   * - SINGLE: basic chain
+   * - ANALYTICAL: includes theoretical values using volatility, underlyingPrice, interestRate, and daysToExpiration
+   */
+  strategy?: OptionStrategyEnum;
+
+  /**
+   * Strike interval for spread strategies (only used when strategy ≠ SINGLE).
+   * @type integer
+   */
+  interval?: number;
+
+  /**
+   * A specific strike price to filter the chain.
+   * @type float
+   */
+  strike?: number;
+
+  /**
+   * Range (in price units) around the at‑the‑money strike to include.
+   * @type float
+   */
+  range?: number;
+
+  /**
+   * Lower bound for expiration dates (inclusive). Accepts a Date object or ISO 8601 string.
+   */
+  fromDate?: string | Date;
+
+  /**
+   * Upper bound for expiration dates (inclusive). Accepts a Date object or ISO 8601 string.
+   */
+  toDate?: string | Date;
+
+  /**
+   * Volatility (as a decimal, e.g. 0.25 for 25%) used for theoretical pricing (ANALYTICAL only).
+   * @type float
+   */
+  volatility?: number;
+
+  /**
+   * Underlying price used for theoretical calculations (ANALYTICAL only).
+   * @type float
+   */
+  underlyingPrice?: number;
+
+  /**
+   * Interest rate (as a decimal, e.g. 0.01 for 1%) used for theoretical pricing (ANALYTICAL only).
+   * @type float
+   */
+  interestRate?: number;
+
+  /**
+   * Days to expiration used for theoretical calculations (ANALYTICAL only).
+   * @type integer
+   */
+  daysToExpiration?: number;
+
+  /**
+   * Filter by expiration month.
+   */
+  expMonth?: OptionExpiryMonthEnum;
+
+  /**
+   * Further filter by option type (e.g. "CALL" or "PUT") if supported.
+   */
+  optionType?: string;
+
+  /**
+   * Client entitlement level, used to determine data access permissions.
+   */
+  entitlement?: EntitlementEnum;
+}
+
+/**
+ * GET /v1/marketdata/chains
+ * Represents a response containing the option chain information for a specific symbol.
+ */
+export type GetOptionsChainsResponse =
+  OptionChain | ErrorResponse;
+
+
+/**
+ * GET /v1/marketdata/expirationchain
+ * Represents a request to retrieve expiration chain information for a specific symbol.
+ * Request: string symbol
+ */
+export type GetExpirationChainRequest = string;
+export type GetExpirationChainResponse = ExpirationChain | ErrorResponse;
+
+/**
+ * GET /v1/marketdata/pricehistory
+ * Represents a request to retrieve price history for a specific symbol.
+ * 
+ * @property symbol - The symbol for which to fetch price history (e.g., "AAPL").
+ */
+export interface GetPriceHistoryRequest {
+  symbol: string;
+  periodType?: PeriodTypeEnum; // default: 'day'?
+  period?: number; // default: 14?
+  frequencyType?: FrequencyTypeEnum; // default: 'minute'?
+  frequency?: number; // default: 1?
+  startDate?: string | Date; // Start date, as Date object or ISO 8601 string
+  endDate?: string | Date; // End date, as Date object or ISO 8601 string
+  needExtendedHoursData?: boolean; // default: false?
+  needPreviousClose?: boolean; // default: false?
+}
+
+/**
+ * GET /v1/marketdata/movers/{symbol_id}
+ * Represents a request to retrieve market movers for a specific symbol.
+ * 
+ * @property symbol - the index for which to fetch market movers (e.g., "$SPX").
+ */
+export interface GetMarketMoversRequest {
+  symbol_id: IndexSymbolEnum;
+  sort?: SortMoversByEnum;
+
+  /**
+   * Frequency property.
+   * Acceptable values: 0, 1, 5, 10, 30, 60
+   * Default value: 0
+   */
+  frequency?: 0 | 1 | 5 | 10 | 30 | 60;
+}
+export type GetMarketMoversResponse =
+  MarketMoversResponse | ErrorResponse;
+
+/**
+ * GET /v1/marketdata/markets
+ * Represents a request to retrieve market hours for a specific date.
+ */
+export type GetMarketHoursRequest = {
+  markets: MarketsEnum[];
+  date: string | Date; // Date for which to retrieve market hours. YYYY-MM-DD format or Date object.
+}
+
+/**
+ * Represents the response type for a request to retrieve market hours.
+ * 
+ * This type is a union of two possible responses:
+ * - `MarketHoursResponse`: Indicates a successful response containing market hours data.
+ * - `ErrorResponse`: Indicates an error occurred during the request, providing error details.
+ * 
+ * ### MarketHoursResponse Structure:
+ * - The `MarketHoursResponse` is a `Record<string, Record<string, MarketHours>>`.
+ * - The outer `Record<string, MarketHours>` keys represent the market type, which can be one of the following:
+ *   - `equity`
+ *   - `option`
+ *   - `future`
+ *   - `bond`
+ * - The inner `Record<string, MarketHours>` keys represent product codes (guessing, not documented).
+ * - Each inner `MarketHours` object contains detailed information about the market hours for that product.
+ * 
+ * ### MarketHours Object:
+ * - `date`: The date for which the market hours are provided, in `YYYY-MM-DD` format.
+ * - `marketType`: The type of market, corresponding to the outer record key.
+ * - `exchange`: The name of the exchange (e.g., "NYSE", "NASDAQ").
+ * - `category`: The category of the market (e.g., "equity", "option").
+ * - `product`: The product type (e.g., "stock", "option").
+ * - `productName`: The name of the product (e.g., "Apple Inc.").
+ * - `isOpen`: A boolean indicating whether the market is open.
+ * - `sessionHours`: A `Record<string, Interval[]>` where:
+ *   - The keys represent the session type, such as:
+ *     - `preMarket`
+ *     - `regularMarket`
+ *     - `postMarket`
+ *   - The values are arrays of `Interval` objects, each containing:
+ *     - `start`: The start time of the session in `HH:mm:ss` format.
+ *     - `end`: The end time of the session in `HH:mm:ss` format.
+ */
+export type GetMarketHoursResponse = MarketHoursResponse | ErrorResponse;
+
+/**
+ * GET /v1/marketdata/markets/{market}
+ * Represents a request to retrieve market hours for a specific market.
+ */
+export interface GetSingleMarketHoursRequest {
+  market: MarketsEnum;
+  date: string | Date; // Date for which to retrieve market hours. YYYY-MM-DD format or Date object.
+}
+// Type alias
+export type GetSingleMarketHoursResponse = GetMarketHoursResponse;
+
+/**
+ * GET /v1/marketdata/instruments
+ * Represents a request to retrieve instrument information for a specific symbol.
+ */
+export interface GetInstrumentsRequest {
+  symbol: string;
+  projection: SearchByEnum;
+}
+/**
+ * GET /v1/marketdata/instruments
+ * Represents a response containing instrument information for a specific symbol.
+ */
+export type GetInstrumentsResponse =
+  GetInstrumentsBaseResponse | ErrorResponse;
+
+/**
+ * GET /v1/marketdata/instruments/{cusip_id}
+ * Represents a request to retrieve instrument information for a specific CUSIP.
+ */
+export type GetInstrumentByCusipRequest = string;
+/**
+ * GET /v1/marketdata/instruments/{cusip_id}
+ * Represents a response containing instrument information for a specific CUSIP.
+ */
+export type GetInstrumentByCUSIPResponse =
+  InstrumentResponse | ErrorResponse;
+
+/////// Interfaces
+
+export interface GetInstrumentsBaseResponse {
+  instruments: InstrumentResponse[];
+}
+
+export enum SearchByEnum {
+  SYMBOL_SEARCH = 'symbol-search',
+  SYMBOL_REGEX = 'symbol-regex',
+  DESC_SEARCH = 'desc-search',
+  DESC_REGEX = 'desc-regex',
+  SEARCH = 'search',
+  FUNDAMENTAL = 'fundamental',
+}
+
+export type MarketHoursResponse =
+  Record<string, Record<string, MarketHours>>;
+
+export enum MarketsEnum {
+  EQUITY = 'equity',
+  OPTION = 'option',
+  FUTURE = 'future',
+  BOND = 'bond',
+}
+
+export interface MarketMoversResponse {
+  screeners: Screener[];
+}
+
+export enum IndexSymbolEnum {
+  DJI = '$DJI', // Dow Jones Industrial Average
+  COMPX = '$COMPX', // NASDAQ Composite
+  SPX = '$SPX', // S&P 500
+  NYSE = 'NYSE', // New York Stock Exchange
+  NASDAQ = 'NASDAQ', // NASDAQ Stock Market
+  OTCBB = 'OTCBB', // Over-the-Counter Bulletin Board
+  INDEX_ALL = 'INDEX_ALL', // All Indexes
+  EQUITY_ALL = 'EQUITY_ALL', // All Equities
+  OPTION_ALL = 'OPTION_ALL', // All Options
+  OPTION_PUT = 'OPTION_PUT', // All Put Options
+  OPTION_CALL = 'OPTION_CALL', // All Call Options
+}
+
+export enum SortMoversByEnum {
+  VOLUME = 'VOLUME',
+  TRADES = 'TRADES',
+  PERCENT_CHANGE_UP = 'PERCENT_CHANGE_UP',
+  PERCENT_CHANGE_DOWN = 'PERCENT_CHANGE_DOWN',
+}
+
+export enum EntitlementEnum {
+  PP = 'PP', // Paying Pro
+  NP = 'NP', // NonPro
+  PN = 'PN', // NonPaying Pro
+}
+
+export enum PeriodTypeEnum {
+  DAY = 'day',
+  MONTH = 'month',
+  YEAR = 'year',
+  YTD = 'ytd', // Year To Date
+}
+
+export enum FrequencyTypeEnum {
+  MINUTE = 'minute',
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+}
+
+export type PutCallAllEnum = PutCallEnum | {
+  ALL: 'ALL', // All options
+}
+
+export enum GetQuotesAcceptableFieldsEnum {
+  QUOTE = 'quote',
+  FUNDAMENTAL = 'fundamental',
+
+  // These were recommended by GitHub copilot. I'm unsure if they are correct.
+  EXTENDED = 'extended',
+  REFERENCE = 'reference',
+  REGULAR = 'regular',
+}
 
 export enum OptionExpirationType {
   MONTHLY = 'M', // End Of Month Expiration Calendar Cycle
@@ -44,6 +485,22 @@ export enum FundStrategyEnum {
 export enum OptionExerciseTypeEnum {
   AMERICAN = 'A',
   EUROPEAN = 'E',
+}
+
+export enum OptionExpiryMonthEnum {
+  JANUARY = 'JAN',
+  FEBRUARY = 'FEB',
+  MARCH = 'MAR',
+  APRIL = 'APR',
+  MAY = 'MAY',
+  JUNE = 'JUN',
+  JULY = 'JUL',
+  AUGUST = 'AUG',
+  SEPTEMBER = 'SEP',
+  OCTOBER = 'OCT',
+  NOVEMBER = 'NOV',
+  DECEMBER = 'DEC',
+  ALL = 'ALL',
 }
 
 export enum DividendFrequency {
@@ -108,7 +565,7 @@ export interface Error {
   status: string; // HTTP status code
   title: string; // Short error description
   detail: string; // Detailed error description
-  source: ErrorSource;
+  source?: ErrorSource;
 }
 
 export interface ErrorResponse {
@@ -313,7 +770,7 @@ export interface OptionContractMap {
 export interface OptionChain {
   symbol: string;
   status: string;
-  underlying: Underlying;
+  underlying?: Underlying;
   strategy: OptionStrategyEnum;
   interval: number;
   isDelayed: boolean;
@@ -327,9 +784,9 @@ export interface OptionChain {
 }
 
 export interface ErrorSource {
-  pointer: string[]; // List of attributes which lead to this error message.
-  parameter: string; // Parameter name which led to this error message.
-  header: string; // Header name which led to this error message.
+  pointer?: string[]; // List of attributes which lead to this error message.
+  parameter?: string; // Parameter name which led to this error message.
+  header?: string; // Header name which led to this error message.
 }
 
 export interface BaseQuoteResponse<Quote, Reference> {

@@ -1,7 +1,6 @@
-import { IDToken } from "../../../lib/auth/idtoken";
 import { AppConfig } from "./appconfig";
 import { getInitialTokensFromAuthorizationCode, getNewAccessToken } from "./auth";
-import { decodeIdToken } from "./idtoken";
+import { decodeIdToken, IDToken } from "./idtoken";
 
 /**
  * Represents a set of authentication tokens, including access and refresh tokens,
@@ -84,8 +83,9 @@ export class AuthTokens {
  * using the refresh token at regular intervals.
  */
 export class AutoRefreshAuthTokens extends AuthTokens {
-  protected refreshInterval: NodeJS.Timeout;
+  protected refreshInterval?: NodeJS.Timeout;
   protected appConfig: AppConfig;
+  protected refreshIntervalTimer: number;
 
   constructor(appConfig: AppConfig, refreshToken: string, accessToken?: string,
     refreshInterval: number = 1000 * 60 * 20
@@ -94,11 +94,7 @@ export class AutoRefreshAuthTokens extends AuthTokens {
     this.refreshToken = refreshToken;
     this.accessToken = accessToken || '';
     this.appConfig = appConfig;
-
-    // every 20 minutes
-    this.refreshInterval = setInterval(() => {
-        this.doRefreshAccessToken()
-      }, refreshInterval);
+    this.refreshIntervalTimer = refreshInterval;
   }
 
   private doRefreshAccessToken(retries?: number): void {
@@ -116,7 +112,7 @@ export class AutoRefreshAuthTokens extends AuthTokens {
     .then((response) => {
       this.setAccessToken(response.accessToken);
       this.setAccessTokenExpiresAt(response.accessTokenExpiresAt);
-      this.setIdToken(response.id_token);
+      this.setIdToken(decodeIdToken(Buffer.from(response.id_token, 'base64')));
 
       if (response.refreshToken && response.refreshToken !== this.refreshToken) {
         this.setRefreshToken(response.refreshToken);
@@ -135,6 +131,22 @@ export class AutoRefreshAuthTokens extends AuthTokens {
         this.doRefreshAccessToken(retries + 1);
       }, 60 * 1000);
     });
+  }
+
+  start() {
+    if (this.refreshInterval) {
+      this.stop();
+    }
+
+    // every 20 minutes
+    this.refreshInterval = setInterval(() => {
+      this.doRefreshAccessToken()
+    }, this.refreshIntervalTimer);
+  }
+
+  stop() {
+    clearInterval(this.refreshInterval);
+    this.refreshInterval = undefined;
   }
 
   public static async fromAuthCode(
