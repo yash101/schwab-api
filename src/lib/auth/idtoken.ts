@@ -18,7 +18,7 @@ export interface IDToken {
   signature: Buffer;
 }
 
-function extractJSONObjectFromBuffer(buf: Buffer, offset) {
+function extractJSONObjectFromBuffer(buf: Buffer, offset: number) {
   let depth = 0;
   let start = -1;
   let i = offset;

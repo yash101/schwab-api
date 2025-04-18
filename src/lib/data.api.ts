@@ -4,10 +4,10 @@ import { AuthTokens } from './auth/tokens';
 import { assert_warn } from './util/Assert';
 import { ErrorResponse, FrequencyTypeEnum, GetExpirationChainRequest, GetInstrumentByCusipRequest, GetInstrumentByCUSIPResponse, GetInstrumentsRequest, GetInstrumentsResponse, GetMarketHoursRequest, GetMarketHoursResponse, GetMarketMoversRequest, GetMarketMoversResponse, GetOptionChainsRequest, GetOptionsChainsResponse, GetPriceHistoryRequest, GetQuotesRequest, GetQuotesResponse, GetSingleMarketHoursRequest, GetSingleMarketHoursResponse, GetSingleQuoteRequest, GetSingleQuoteResponse, PeriodTypeEnum } from './types/dataapi';
 
-const CONTENT_TYPE = 'Content-Type';
-const APPLICATION_JSON = 'application/json';
-const APPLICATION_FORM_URLENCODED = 'application/x-www-form-urlencoded';
-const GET = 'GET';
+const CONTENT_TYPE: string = 'Content-Type';
+const APPLICATION_JSON: string = 'application/json';
+const APPLICATION_FORM_URLENCODED: string = 'application/x-www-form-urlencoded';
+const GET: string = 'GET';
 
 export class DataApi {
   private tokens: AuthTokens;
@@ -36,7 +36,7 @@ export class DataApi {
         ...headers,
         Authorization: this.tokens.getAuthHeader(),
         Accept: APPLICATION_JSON,
-      },
+      } as Record<string, string>,
     };
 
     if (body) {
@@ -55,8 +55,7 @@ export class DataApi {
       }
 
       options.body = body;
-      options.headers = options.headers || {};
-      options.headers[CONTENT_TYPE] = mimeType;
+      (options.headers as Record<string, string>)[CONTENT_TYPE] = mimeType;
     }
 
     try {

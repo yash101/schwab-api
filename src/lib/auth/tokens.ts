@@ -11,10 +11,10 @@ export class AuthTokens {
   protected accessToken: string = '';
   protected refreshToken: string = '';
   protected scope: string = '';
-  protected idToken: IDToken;
+  protected idToken?: IDToken;
 
-  protected atExpiresAt: Date;
-  protected rtExpiresAt: Date;
+  protected atExpiresAt?: Date;
+  protected rtExpiresAt?: Date;
 
   getAccessToken(): string {
     return this.accessToken;
@@ -25,14 +25,14 @@ export class AuthTokens {
   }
 
   getAccessTokenExpiresAt(): Date {
-    return this.atExpiresAt;
+    return this.atExpiresAt || new Date();
   }
 
   getRefreshTokenExpiresAt(): Date {
-    return this.rtExpiresAt;
+    return this.rtExpiresAt || new Date();
   }
 
-  getUserId(): IDToken {
+  getUserId(): IDToken | undefined {
     return this.idToken;
   }
 
@@ -41,11 +41,11 @@ export class AuthTokens {
   }
 
   isAccessTokenExpired(): boolean {
-    return this.atExpiresAt <= new Date();
+    return (!this.atExpiresAt) || this.atExpiresAt <= new Date();
   }
 
   isRefreshTokenExpired(): boolean {
-    return this.rtExpiresAt <= new Date();
+    return (!this.rtExpiresAt) || this.rtExpiresAt <= new Date();
   }
 
   setAccessToken(token: string): void {
@@ -97,6 +97,7 @@ export class AutoRefreshAuthTokens extends AuthTokens {
     this.refreshIntervalTimer = refreshInterval;
   }
 
+  // Method to refresh the access token using the refresh token
   private doRefreshAccessToken(retries?: number): void {
     if (retries && retries > 5) {
       console.error('Failed to refresh access token after 5 retries. No longer attempting to refresh.');
@@ -133,6 +134,7 @@ export class AutoRefreshAuthTokens extends AuthTokens {
     });
   }
 
+  // Method to start the automatic refresh interval
   start() {
     if (this.refreshInterval) {
       this.stop();
@@ -142,11 +144,28 @@ export class AutoRefreshAuthTokens extends AuthTokens {
     this.refreshInterval = setInterval(() => {
       this.doRefreshAccessToken()
     }, this.refreshIntervalTimer);
+
+    return this;
   }
 
   stop() {
     clearInterval(this.refreshInterval);
     this.refreshInterval = undefined;
+    return this;
+  }
+
+  refreshImmediately() {
+    this.doRefreshAccessToken();
+    return this;
+  }
+
+  setRefreshInterval(interval: number) {
+    this.refreshIntervalTimer = interval;
+    if (this.refreshInterval) {
+      this.stop();
+      this.start();
+    }
+    return this;
   }
 
   public static async fromAuthCode(
