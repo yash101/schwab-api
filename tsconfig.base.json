@@ -7,7 +7,11 @@
     "outDir": "dist/esm",
     "rootDir": "src",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@yash101/schwab-api-client": ["./src/lib"],
+      "@yash101/schwab-api-client/*": ["./src/lib/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src/lib"]
 }

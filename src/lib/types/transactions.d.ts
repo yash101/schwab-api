@@ -11,7 +11,7 @@ import {
   MutualFundTypeEnum,
   OptionTypeEnum,
   ProductTypeEnum,
-  PutCall,
+  PutCallEnum,
   TransactionEquityTypeEnum
 } from "./asset";
 import { FeeTypeEnum } from "./fee";
@@ -196,7 +196,7 @@ export interface TransactionOption extends TransactionBaseInstrument {
   expirationDate: string; // date-time
   optionDeliverables: TransactionAPIOptionDeliverable[];
   optionPremiumMultiplier: number; // int64
-  putCall: PutCall; // Changed from string enum comment
+  putCall: PutCallEnum; // Changed from string enum comment
   strikePrice: number; // double
   type: OptionTypeEnum; // Changed from string enum comment
   underlyingSymbol: string;
