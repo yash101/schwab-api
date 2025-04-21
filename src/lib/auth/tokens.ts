@@ -86,6 +86,7 @@ export class AutoRefreshAuthTokens extends AuthTokens {
   protected refreshInterval?: NodeJS.Timeout;
   protected appConfig: AppConfig;
   protected refreshIntervalTimer: number;
+  protected onRefreshTokenChanged: (orig: AutoRefreshAuthTokens) => any = () => {};
 
   constructor(appConfig: AppConfig, refreshToken: string, accessToken?: string,
     refreshInterval: number = 1000 * 60 * 20
@@ -117,7 +118,8 @@ export class AutoRefreshAuthTokens extends AuthTokens {
 
       if (response.refreshToken && response.refreshToken !== this.refreshToken) {
         this.setRefreshToken(response.refreshToken);
-        this.setRefreshTokenExpiresAt(new Date(Date.now() + 1000 * 60 * 60 * 24 * 6));
+        this.setRefreshTokenExpiresAt(new Date(Date.now() + 1000 * 60 * 60 * 24 * 7));
+        this.onRefreshTokenChanged(this);
       }
     })
     .catch(e => {
@@ -165,6 +167,11 @@ export class AutoRefreshAuthTokens extends AuthTokens {
       this.stop();
       this.start();
     }
+    return this;
+  }
+
+  setOnRefreshTokenChanged(callback: (orig: AutoRefreshAuthTokens) => any) {
+    this.onRefreshTokenChanged = callback;
     return this;
   }
 

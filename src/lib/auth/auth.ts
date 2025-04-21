@@ -57,8 +57,8 @@ export async function getInitialTokensFromAuthorizationCode({
     return {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
-      accessTokenExpiresAt: new Date(Date.now() + 1000 * (Number(data.expires_in) - 120)),
-      refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 6),
+      accessTokenExpiresAt: new Date(Date.now() + 1000 * Number(data.expires_in)),
+      refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       type: data.token_type,
       scope: data.scope,
       id_token: data.id_token,
@@ -105,7 +105,7 @@ export async function getNewAccessToken({
     return {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
-      accessTokenExpiresAt: new Date(Date.now() + 1000 * (Number(data.expires_in) - 120)),
+      accessTokenExpiresAt: new Date(Date.now() + 1000 * Number(data.expires_in)),
       type: data.token_type,
       scope: data.scope,
       id_token: data.id_token,
