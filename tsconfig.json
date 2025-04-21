@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "outDir": "dist",
+    "rootDir": "src/lib",
+    "strict": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "paths": {
+      "@yash101/schwab-api-client": ["./lib"],
+      "@yash101/schwab-api-client/*": ["./lib/*"]
+    }
+  },
+  "include": ["src/lib"]
+}
