@@ -1,9 +1,8 @@
 {
   "name": "@yash101/schwab-api-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A TypeScript client library for interacting with the Charles Schwab Brokerage APIs.",
-  "main": "dist/cjs/index.js",
-  "module": "dis/esm/index.js",
+  "module": "dis/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
     "test": "jest",
