@@ -10,11 +10,7 @@
     "rootDir": "src/lib",
     "strict": true,
     "sourceMap": true,
-    "declarationMap": true,
-    "paths": {
-      "@yash101/schwab-api-client": ["./lib"],
-      "@yash101/schwab-api-client/*": ["./lib/*"]
-    }
+    "declarationMap": true
   },
   "include": ["src/lib"]
 }
