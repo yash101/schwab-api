@@ -1,4 +1,4 @@
-import { DateAndTime } from "../types/api";
+import { DateAndTime } from "../api-types/api.types";
 
 /**
  * Converts a Date object to an ISO-8601 string (yyyy-MM-dd'T'HH:mm:ss.SSSZ).

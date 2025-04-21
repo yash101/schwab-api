@@ -2,7 +2,29 @@ import assert from 'assert';
 import { APIOptions } from './apioptions';
 import { AuthTokens } from './auth/tokens';
 import { assert_warn } from './util/Assert';
-import { ErrorResponse, FrequencyTypeEnum, GetExpirationChainRequest, GetInstrumentByCusipRequest, GetInstrumentByCUSIPResponse, GetInstrumentsRequest, GetInstrumentsResponse, GetMarketHoursRequest, GetMarketHoursResponse, GetMarketMoversRequest, GetMarketMoversResponse, GetOptionChainsRequest, GetOptionsChainsResponse, GetPriceHistoryRequest, GetQuotesRequest, GetQuotesResponse, GetSingleMarketHoursRequest, GetSingleMarketHoursResponse, GetSingleQuoteRequest, GetSingleQuoteResponse, PeriodTypeEnum } from './types/dataapi';
+import {
+  ErrorResponse,
+  FrequencyTypeEnum,
+  GetExpirationChainRequest,
+  GetInstrumentByCusipRequest,
+  GetInstrumentByCUSIPResponse,
+  GetInstrumentsRequest,
+  GetInstrumentsResponse,
+  GetMarketHoursRequest,
+  GetMarketHoursResponse,
+  GetMarketMoversRequest,
+  GetMarketMoversResponse,
+  GetOptionChainsRequest,
+  GetOptionsChainsResponse,
+  GetPriceHistoryRequest,
+  GetQuotesRequest,
+  GetQuotesResponse,
+  GetSingleMarketHoursRequest,
+  GetSingleMarketHoursResponse,
+  GetSingleQuoteRequest,
+  GetSingleQuoteResponse,
+  PeriodTypeEnum
+} from './api-types/dataapi.types';
 
 const CONTENT_TYPE: string = 'Content-Type';
 const APPLICATION_JSON: string = 'application/json';

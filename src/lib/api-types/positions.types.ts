@@ -1,4 +1,4 @@
-import { AccountsInstrument } from "./accounts"; // Added import
+import { AccountsInstrument } from "./accounts.types"; // Added import
 
 export interface Position {
   shortQuantity: number;

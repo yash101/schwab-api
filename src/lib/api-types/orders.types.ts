@@ -1,8 +1,8 @@
-import { AccountsInstrument, EncryptedAccountNumber, AccountNumberString } from "./accounts"; // Added AccountNumberString
-import { APIRuleAction, ErrorMessageAndErrors, NoParametersResponse } from "./api";
-import { AssetType } from "./asset";
-import { CommissionAndFee } from "./fee";
-import { DestinationEnum, DurationEnum, SessionEnum } from "./market";
+import { AccountsInstrument, EncryptedAccountNumber, AccountNumberString } from "./accounts.types"; // Added AccountNumberString
+import { APIRuleAction, ErrorMessageAndErrors, NoParametersResponse } from "./api.types";
+import { AssetType } from "./asset.types";
+import { CommissionAndFee } from "./fee.types";
+import { DestinationEnum, DurationEnum, SessionEnum } from "./market.types";
 
 //////// RPCs
 

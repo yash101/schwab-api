@@ -1,5 +1,3 @@
-import { QuoteResponseObject } from "./dataapi";
-
 export enum AssetType {
   EQUITY = "EQUITY",
   MUTUAL_FUND = "MUTUAL_FUND",

@@ -1,5 +1,5 @@
-import { ErrorMessageAndErrors, NoParametersRequest } from "./api";
-import { AccountType } from "./accounts"; // Added import
+import { ErrorMessageAndErrors, NoParametersRequest } from "./api.types";
+import { AccountType } from "./accounts.types"; // Added import
 
 /////// RPCs
 // getUserPreferences

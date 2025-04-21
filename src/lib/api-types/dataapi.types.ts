@@ -51,8 +51,8 @@
  */
 
 
-import { PutCallEnum } from './asset';
-import { ExchangeName } from './market';
+import { PutCallEnum } from './asset.types';
+import { ExchangeName } from './market.types';
 
 /////// RPCs
 

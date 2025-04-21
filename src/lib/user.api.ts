@@ -1,7 +1,10 @@
 import { APIOptions } from "./apioptions";
 import { AuthTokens } from "./auth/tokens";
-import { ErrorMessageAndErrors } from "./types/api";
-import { GetUserPreferencesRequest, GetUserPreferencesResponse } from "./types/user";
+import { ErrorMessageAndErrors } from "./api-types/api.types";
+import {
+  GetUserPreferencesRequest,
+  GetUserPreferencesResponse
+} from "./api-types/user.types";
 
 export async function getUserPreference(
   request: GetUserPreferencesRequest | null, token: AuthTokens, apiOptions?: APIOptions

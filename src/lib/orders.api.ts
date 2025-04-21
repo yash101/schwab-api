@@ -16,8 +16,8 @@ import {
   PreviewOrderForAccountResponse,
   ReplaceOrderForAccountByOrderIdRequest,
   ReplaceOrderForAccountByOrderIdResponse
-} from "./types/orders";
-import { ErrorMessageAndErrors } from "./types/api";
+} from "./api-types/orders.types";
+import { ErrorMessageAndErrors } from "./api-types/api.types";
 
 /**
  * Retrieves orders for a specific Schwab account based on filtering criteria.

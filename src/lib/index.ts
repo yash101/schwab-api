@@ -12,16 +12,16 @@ export * as SchwabAPIOptions from './apioptions';
 // export * as SchwabStreamAPI from './lib/schwabstream.api';
 
 /////// TypeScript types & Definitions
-export type * as AccountsTypes from './types/accounts';
-export type * as ApiTypes from './types/api';
-export type * as AssetTypes from './types/asset';
-export type * as BalancesTypes from './types/balances';
-export type * as DataApiTypes from './types/dataapi';
-export type * as FeeTypes from './types/fee';
-export type * as OrdersTypes from './types/orders';
-export type * as PositionsTypes from './types/positions';
-export type * as TransactionsTypes from './types/transactions';
-export type * as UserTypes from './types/user';
+export type * as AccountsTypes from './api-types/accounts.types';
+export type * as ApiTypes from './api-types/api.types';
+export type * as AssetTypes from './api-types/asset.types';
+export type * as BalancesTypes from './api-types/balances.types';
+export type * as DataApiTypes from './api-types/dataapi.types';
+export type * as FeeTypes from './api-types/fee.types';
+export type * as OrdersTypes from './api-types/orders.types';
+export type * as PositionsTypes from './api-types/positions.types';
+export type * as TransactionsTypes from './api-types/transactions.types';
+export type * as UserTypes from './api-types/user.types';
 
 // Under development
 // export * as StreamerTypes from './lib/types/streamer';

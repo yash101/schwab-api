@@ -1,13 +1,13 @@
 import assert from "assert";
 import { AuthTokens } from "./auth/tokens";
 import { APIOptions } from "./apioptions";
-import { ErrorMessageAndErrors } from "./types/api";
+import { ErrorMessageAndErrors } from "./api-types/api.types";
 import {
   GetTransactionForAccountByTransactionIdRequest,
   GetTransactionForAccountByTransactionIdResponse,
   GetTransactionsForAccountRequest,
   GetTransactionsForAccountResponse
-} from "./types/transactions";
+} from "./api-types/transactions.types";
 
 export async function getTransactionsForAccount(request: GetTransactionsForAccountRequest,
   token: AuthTokens, apiOptions: APIOptions

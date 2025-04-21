@@ -1,5 +1,5 @@
-import { EncryptedAccountNumber, UserDetails } from "./accounts";
-import { DateAndTime, ErrorMessageAndErrors } from "./api";
+import { EncryptedAccountNumber, UserDetails } from "./accounts.types";
+import { DateAndTime, ErrorMessageAndErrors } from "./api.types";
 import {
   AssetType,
   CashEquivalentTypeEnum,
@@ -13,9 +13,9 @@ import {
   ProductTypeEnum,
   PutCallEnum,
   TransactionEquityTypeEnum
-} from "./asset";
-import { FeeTypeEnum } from "./fee";
-import { PositionEffectEnum } from "./orders";
+} from "./asset.types";
+import { FeeTypeEnum } from "./fee.types";
+import { PositionEffectEnum } from "./orders.types";
 
 /////// RPCs
 

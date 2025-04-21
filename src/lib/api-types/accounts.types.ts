@@ -1,7 +1,7 @@
-import { ErrorMessageAndErrors } from "./api";
-import { AssetType, PutCallEnum } from "./asset";
-import { CashInitialBalance, MarginBalance, MarginInitialBalance, CashBalance } from "./balances"; // Added CashBalance import
-import { Position } from "./positions";
+import { ErrorMessageAndErrors } from "./api.types";
+import { AssetType, PutCallEnum } from "./asset.types";
+import { CashInitialBalance, MarginBalance, MarginInitialBalance, CashBalance } from "./balances.types"; // Added CashBalance import
+import { Position } from "./positions.types";
 
 ////// RPCs
 

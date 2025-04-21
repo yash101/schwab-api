@@ -1,6 +1,6 @@
 import assert from "assert";
 import { AuthTokens } from "./auth/tokens";
-import { ErrorMessageAndErrors, NoParametersRequest } from "./types/api";
+import { ErrorMessageAndErrors, NoParametersRequest } from "./api-types/api.types";
 import { APIOptions } from "./apioptions";
 import {
   GetAccountNumbersResponse, 
@@ -8,7 +8,7 @@ import {
   GetAccountsResponse,
   GetSingleAccountRequest,
   GetSingleAccountResponse
-} from "./types/accounts";
+} from "./api-types/accounts.types";
 
 export async function getAccountNumbers(request: NoParametersRequest | null,
   token: AuthTokens, apiOptions?: APIOptions
