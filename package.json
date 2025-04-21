@@ -1,6 +1,6 @@
 {
   "name": "@yash101/schwab-api-client",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A TypeScript client library for interacting with the Charles Schwab Brokerage APIs.",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -45,8 +45,7 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "import": "./dist/index.js"
     }
   }
 }
